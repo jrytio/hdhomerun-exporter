@@ -1,6 +1,6 @@
 [project]
 name = "hdhomerun-exporter"
-version = "0.1.0"
+version = "1.0.0"
 description = "Prometheus exporter for SiliconDust HDHomeRun tuners, over the TCP control protocol"
 requires-python = ">=3.13"
 dependencies = ["prometheus-client>=0.26,<1"]
