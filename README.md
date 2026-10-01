@@ -30,7 +30,9 @@ scrape_configs:
 
 ## Dashboard
 
-In Grafana, go to **Dashboards → New → Import** and upload [`dashboards/hdhomerun.json`](dashboards/hdhomerun.json). Pick your Prometheus datasource when prompted.
+In Grafana, go to **Dashboards → New → Import** and upload [`dashboards/hdhomerun.json`](dashboards/hdhomerun.json). If you have more than one Prometheus datasource, pick yours in the dropdown at the top of the dashboard.
+
+It leads with what is playing now and how well it is being received, then viewing history, reception and throughput over time. Model, firmware and Ethernet link are in the collapsed row at the bottom. Tested with Grafana 12.3.
 
 ## Configuration
 
