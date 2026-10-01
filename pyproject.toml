@@ -1,6 +1,6 @@
 [project]
 name = "hdhomerun-exporter"
-version = "1.0.0"
+version = "1.0.1"
 description = "Prometheus exporter for SiliconDust HDHomeRun tuners, over the TCP control protocol"
 readme = "README.md"
 license = "MIT"
