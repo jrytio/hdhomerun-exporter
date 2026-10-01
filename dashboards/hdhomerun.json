@@ -2,13 +2,14 @@
   "uid": "hdhomerun",
   "id": null,
   "title": "HDHomeRun",
+  "description": "SiliconDust HDHomeRun tuners via hdhomerun-exporter: what is playing, how well it is being received, and who watched what.",
   "tags": [
     "hdhomerun",
     "tv",
     "prometheus"
   ],
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "editable": true,
   "graphTooltip": 1,
   "refresh": "30s",
@@ -64,33 +65,20 @@
   },
   "panels": [
     {
-      "type": "row",
-      "id": 1,
-      "title": "Summary",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "panels": []
-    },
-    {
       "type": "stat",
-      "id": 2,
-      "title": "Device",
-      "description": "hdhomerun_up, worst device: DOWN if any selected device failed its last read, or if the exporter is not being scraped at all.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
+      "id": 1,
+      "title": "Devices",
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 1
+        "y": 0
       },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "DOWN if any selected device failed its last read, or if the exporter is not being scraped at all.",
       "targets": [
         {
           "datasource": {
@@ -154,157 +142,19 @@
     },
     {
       "type": "stat",
-      "id": 3,
-      "title": "Firmware",
-      "description": "The device auto-updates; a change here is a firmware update.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
+      "id": 2,
+      "title": "Tuners in use",
       "gridPos": {
         "h": 4,
         "w": 5,
         "x": 4,
-        "y": 1
+        "y": 0
       },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "hdhomerun_info{device_id=~\"$device_id\"}",
-          "legendFormat": "{{firmware}}",
-          "refId": "A",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "mappings": [],
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "name",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto"
-      }
-    },
-    {
-      "type": "stat",
-      "id": 4,
-      "title": "Ethernet link",
-      "description": "DEGRADED if any selected device reports a link other than 100f; 10 Mbit or half duplex cannot carry two tuners at ~19 Mbps each. A down device has no link reading and does not count here (see Device).",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 9,
-        "y": 1
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "1 - clamp_max(count(hdhomerun_ethernet_link_info{device_id=~\"$device_id\", link!=\"100f\"}) or on() vector(0), 1)",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "DEGRADED (not 100f)",
-                  "color": "red",
-                  "index": 0
-                },
-                "1": {
-                  "text": "100 Mbit full duplex",
-                  "color": "green",
-                  "index": 1
-                }
-              }
-            }
-          ],
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto"
-      }
-    },
-    {
-      "type": "stat",
-      "id": 5,
-      "title": "Tuners in use",
       "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 14,
-        "y": 1
-      },
       "targets": [
         {
           "datasource": {
@@ -321,7 +171,7 @@
             "uid": "${datasource}"
           },
           "expr": "sum(hdhomerun_tuners{device_id=~\"$device_id\"})",
-          "legendFormat": "total",
+          "legendFormat": "of",
           "refId": "B"
         }
       ],
@@ -361,34 +211,46 @@
     },
     {
       "type": "stat",
-      "id": 6,
-      "title": "Scrape duration",
-      "description": "",
+      "id": 3,
+      "title": "Signal quality",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 9,
+        "y": 0
+      },
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 19,
-        "y": 1
-      },
+      "description": "The worst tuner in use right now. Green from 70%, yellow from 50%: the levels SiliconDust's own tools use.",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(hdhomerun_scrape_duration_seconds{device_id=~\"$device_id\"})",
+          "expr": "min(hdhomerun_tuner_signal_quality_percent{device_id=~\"$device_id\"})",
           "legendFormat": "",
           "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "mappings": [],
+          "unit": "percent",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "idle",
+                  "color": "text",
+                  "index": 0
+                }
+              }
+            }
+          ],
           "color": {
             "mode": "thresholds"
           },
@@ -396,11 +258,20 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "text",
+                "color": "red",
                 "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 70
               }
             ]
-          }
+          },
+          "noValue": "idle"
         },
         "overrides": []
       },
@@ -420,298 +291,1069 @@
       }
     },
     {
+      "type": "stat",
+      "id": 4,
+      "title": "Symbol quality",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 14,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "The worst tuner in use right now. Below 100% means uncorrectable errors reached the stream: viewers see glitches.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "min(hdhomerun_tuner_symbol_quality_percent{device_id=~\"$device_id\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "idle",
+                  "color": "text",
+                  "index": 0
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 100
+              }
+            ]
+          },
+          "noValue": "idle"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 5,
+      "title": "Errors in range",
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "All error kinds on all selected tuners over the dashboard time range.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(hdhomerun_tuner_errors_total{device_id=~\"$device_id\"}[$__range]))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "mappings": [],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "table",
+      "id": 6,
+      "title": "Now playing",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "One row per tuner that is locked on a channel, with who is streaming it and how well it is being received.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_signal_strength_percent{device_id=~\"$device_id\"} * on(device_id, tuner) group_left(vchannel, name, client) hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})",
+          "legendFormat": "",
+          "refId": "strength",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_signal_quality_percent{device_id=~\"$device_id\"} * on(device_id, tuner) group_left(vchannel, name, client) hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})",
+          "legendFormat": "",
+          "refId": "quality",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_symbol_quality_percent{device_id=~\"$device_id\"} * on(device_id, tuner) group_left(vchannel, name, client) hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})",
+          "legendFormat": "",
+          "refId": "symbol",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_bitrate_bits_per_second{device_id=~\"$device_id\", stage=\"network\"} * on(device_id, tuner) group_left(vchannel, name, client) hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})",
+          "legendFormat": "",
+          "refId": "bitrate",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          },
+          "noValue": "-"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Strength"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 50
+                    },
+                    {
+                      "color": "green",
+                      "value": 75
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic",
+                  "valueDisplayMode": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Quality"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 50
+                    },
+                    {
+                      "color": "green",
+                      "value": 70
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic",
+                  "valueDisplayMode": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Symbol quality"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 100
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic",
+                  "valueDisplayMode": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bitrate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tuner"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Channel"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "device_id": "Device",
+              "tuner": "Tuner",
+              "vchannel": "Channel",
+              "name": "Name",
+              "client": "Client",
+              "Value #strength": "Strength",
+              "Value #quality": "Quality",
+              "Value #symbol": "Symbol quality",
+              "Value #bitrate": "Bitrate"
+            },
+            "indexByName": {
+              "device_id": 0,
+              "tuner": 1,
+              "vchannel": 2,
+              "name": 3,
+              "client": 4,
+              "Value #strength": 5,
+              "Value #quality": 6,
+              "Value #symbol": 7,
+              "Value #bitrate": 8
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Tuner"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "type": "row",
       "id": 7,
-      "title": "Signal (locked tuners only)",
-      "collapsed": false,
+      "title": "Viewing history",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 9
       },
+      "collapsed": false,
       "panels": []
     },
     {
-      "type": "timeseries",
+      "type": "state-timeline",
       "id": 8,
-      "title": "Signal quality (SNR)",
-      "description": "snq. The best single reception-health number; varies per channel (tower and bearing).",
+      "title": "Who watched what",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 6
-      },
+      "description": "One row per tuner; each bar is a channel and the client streaming it.",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "hdhomerun_tuner_signal_quality_percent{device_id=~\"$device_id\"} and on(device_id, tuner) hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 1",
-          "legendFormat": "{{device_id}} tuner {{tuner}}",
-          "refId": "A"
+          "expr": "label_join(label_join(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}), \"channel\", \" \", \"vchannel\", \"name\"), \"state\", \" → \", \"channel\", \"client\") or label_replace(max by (device_id, tuner) (hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 0), \"state\", \"idle\", \"\", \"\")",
+          "legendFormat": "",
+          "refId": "A",
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            }
+            "fillOpacity": 70,
+            "lineWidth": 1
           },
           "color": {
             "mode": "palette-classic"
           },
-          "min": 0,
-          "max": 100
+          "displayName": "${__field.labels.device_id} tuner ${__field.labels.tuner}",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "idle": {
+                  "text": "idle",
+                  "color": "transparent",
+                  "index": 0
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
       "options": {
+        "showValue": "auto",
+        "mergeValues": true,
+        "rowHeight": 0.8,
+        "alignValue": "left",
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
-          "mode": "multi",
+          "mode": "single",
           "sort": "none"
         }
-      }
+      },
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Value": true,
+              "vchannel": true,
+              "name": true,
+              "client": true,
+              "channel": true
+            }
+          }
+        },
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "device_id",
+              "tuner"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": true
+            }
+          }
+        }
+      ]
     },
     {
-      "type": "timeseries",
+      "type": "table",
       "id": 9,
-      "title": "Symbol quality",
-      "description": "seq. Below 100 means uncorrectable errors reached the stream: viewers see glitches.",
+      "title": "Channel time in range",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 6
-      },
+      "description": "Per device, tuner, channel and client: first and last minute seen, and minutes watched, over the dashboard time range.",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "hdhomerun_tuner_symbol_quality_percent{device_id=~\"$device_id\"} and on(device_id, tuner) hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 1",
-          "legendFormat": "{{device_id}} tuner {{tuner}}",
-          "refId": "A"
+          "expr": "min_over_time(timestamp(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}))[$__range:1m]) * 1000",
+          "legendFormat": "",
+          "refId": "first",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max_over_time(timestamp(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}))[$__range:1m]) * 1000",
+          "legendFormat": "",
+          "refId": "last",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count_over_time(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})[$__range:1m])",
+          "legendFormat": "",
+          "refId": "minutes",
+          "instant": true,
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            }
-          },
-          "color": {
-            "mode": "palette-classic"
-          },
-          "min": 0,
-          "max": 100
+            "align": "auto"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "First seen"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.width",
+                "value": 180
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Last seen"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.width",
+                "value": 180
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tuner"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Channel"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Minutes"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
       },
       "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #first": "First seen",
+              "Value #last": "Last seen",
+              "Value #minutes": "Minutes",
+              "vchannel": "Channel",
+              "name": "Name",
+              "client": "Client",
+              "tuner": "Tuner",
+              "device_id": "Device"
+            },
+            "indexByName": {
+              "device_id": 0,
+              "tuner": 1,
+              "vchannel": 2,
+              "name": 3,
+              "client": 4,
+              "Value #first": 5,
+              "Value #last": 6,
+              "Value #minutes": 7
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Last seen",
+                "desc": true
+              }
+            ]
+          }
         }
-      }
+      ]
     },
     {
-      "type": "timeseries",
+      "type": "row",
       "id": 10,
-      "title": "Signal strength",
-      "description": "ss. Raw strength; high strength with low quality means interference or multipath, not a weak signal.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 6
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "hdhomerun_tuner_signal_strength_percent{device_id=~\"$device_id\"} and on(device_id, tuner) hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 1",
-          "legendFormat": "{{device_id}} tuner {{tuner}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            }
-          },
-          "color": {
-            "mode": "palette-classic"
-          },
-          "min": 0,
-          "max": 100
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      }
-    },
-    {
-      "type": "row",
-      "id": 11,
-      "title": "Reception errors",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 14
-      },
-      "panels": []
-    },
-    {
-      "type": "timeseries",
-      "id": 12,
-      "title": "Errors (only kinds with errors are drawn)",
-      "description": "Errors per second. The counters restart at zero with each new stream, which rate() handles as a counter reset. transport = TS errors (te), crc = CRC, resync/overflow = device-side, network = sending to the client.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 15
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "rate(hdhomerun_tuner_errors_total{device_id=~\"$device_id\"}[$__rate_interval]) > 0",
-          "legendFormat": "{{device_id}} tuner {{tuner}} {{kind}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "cps",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            }
-          },
-          "color": {
-            "mode": "palette-classic"
-          },
-          "min": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      }
-    },
-    {
-      "type": "row",
-      "id": 13,
-      "title": "Throughput",
-      "collapsed": false,
+      "title": "Reception",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 23
       },
+      "collapsed": false,
       "panels": []
     },
     {
       "type": "timeseries",
-      "id": 14,
-      "title": "Network bitrate (stacked)",
-      "description": "What the device sends to clients, against a 100 Mbit link.",
+      "id": 11,
+      "title": "Signal quality",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 24
+      },
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "description": "snq: signal-to-noise quality, the best single measure of reception. It varies by channel. Tinted bands: below 70% is marginal, below 50% is poor.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "hdhomerun_tuner_signal_quality_percent{device_id=~\"$device_id\"}",
+          "legendFormat": "{{device_id}} tuner {{tuner}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "transparent",
+                "value": 70
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 12,
+      "title": "Symbol quality",
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
+        "h": 7,
+        "w": 8,
+        "x": 8,
         "y": 24
       },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "seq. Anything below 100% means uncorrectable errors reached the stream: viewers see glitches.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "hdhomerun_tuner_symbol_quality_percent{device_id=~\"$device_id\"}",
+          "legendFormat": "{{device_id}} tuner {{tuner}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 13,
+      "title": "Signal strength",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "ss: raw strength. High strength with low quality means interference or multipath, not a weak signal. Tinted bands are for broadcast: below 75% is marginal, below 50% is poor (cable wants 90% and 80%).",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "hdhomerun_tuner_signal_strength_percent{device_id=~\"$device_id\"}",
+          "legendFormat": "{{device_id}} tuner {{tuner}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "transparent",
+                "value": 75
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 14,
+      "title": "Errors per $__interval",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Errors in each interval; empty when there are none. transport = transport stream errors, crc = CRC errors, resync and overflow = inside the device, network = sending to the client.",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (device_id, tuner, kind) (rate(hdhomerun_tuner_errors_total{device_id=~\"$device_id\"}[$__rate_interval])) * $__interval_ms / 1000 > 0",
+          "legendFormat": "{{device_id}} tuner {{tuner}} {{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0,
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "interval": "1m"
+    },
+    {
+      "type": "row",
+      "id": 15,
+      "title": "Throughput",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 16,
+      "title": "Network bitrate",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "What the device is sending to clients, stacked across tuners.",
       "targets": [
         {
           "datasource": {
@@ -757,334 +1399,311 @@
       }
     },
     {
-      "type": "timeseries",
-      "id": 15,
-      "title": "Bitrate by stage",
-      "description": "device = whole multiplex off the demodulator; transport_stream = after program filtering; network = sent.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 24
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "hdhomerun_tuner_bitrate_bits_per_second{device_id=~\"$device_id\"} and on(device_id, tuner) hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 1",
-          "legendFormat": "{{device_id}} tuner {{tuner}} {{stage}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bps",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            }
-          },
-          "color": {
-            "mode": "palette-classic"
-          },
-          "min": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      }
-    },
-    {
-      "type": "timeseries",
-      "id": 16,
-      "title": "Packets / s",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 24
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "hdhomerun_tuner_network_packets_per_second{device_id=~\"$device_id\"}",
-          "legendFormat": "{{device_id}} tuner {{tuner}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "pps",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            }
-          },
-          "color": {
-            "mode": "palette-classic"
-          },
-          "min": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      }
-    },
-    {
       "type": "row",
-      "id": 17,
-      "title": "Occupancy",
-      "collapsed": false,
+      "id": 21,
+      "title": "Device and exporter details",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 45
       },
-      "panels": []
-    },
-    {
-      "type": "state-timeline",
-      "id": 18,
-      "title": "Who watched what",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 33
-      },
-      "description": "One row per device + tuner + channel + client combination; a bar is time spent on it.",
-      "targets": [
+      "collapsed": true,
+      "panels": [
         {
+          "type": "table",
+          "id": 17,
+          "title": "Devices",
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 46
+          },
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})",
-          "legendFormat": "{{device_id}} tuner {{tuner}}: {{vchannel}} {{name}} -> {{client}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 80,
-            "lineWidth": 0
-          },
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          },
-          "mappings": [
+          "description": "A device that is down has no row here. A 10 Mbit or half-duplex link is flagged: it cannot carry several tuners at up to 19 Mbit/s each.",
+          "targets": [
             {
-              "type": "value",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "hdhomerun_tuners{device_id=~\"$device_id\"} * on(device_id) group_left(hwmodel, firmware) hdhomerun_info{device_id=~\"$device_id\"} * on(device_id) group_left(link) hdhomerun_ethernet_link_info{device_id=~\"$device_id\"}",
+              "legendFormat": "",
+              "refId": "A",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto"
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Ethernet link"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "10h": {
+                            "text": "10 Mbit half duplex",
+                            "index": 0,
+                            "color": "red"
+                          },
+                          "10f": {
+                            "text": "10 Mbit full duplex",
+                            "index": 1,
+                            "color": "red"
+                          },
+                          "100h": {
+                            "text": "100 Mbit half duplex",
+                            "index": 2,
+                            "color": "red"
+                          },
+                          "100f": {
+                            "text": "100 Mbit full duplex",
+                            "index": 3
+                          },
+                          "1000f": {
+                            "text": "1 Gbit full duplex",
+                            "index": 4
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm"
+          },
+          "transformations": [
+            {
+              "id": "organize",
               "options": {
-                "1": {
-                  "text": "watching",
-                  "index": 0
+                "excludeByName": {
+                  "Time": true
+                },
+                "renameByName": {
+                  "device_id": "Device",
+                  "target": "Address",
+                  "hwmodel": "Model",
+                  "firmware": "Firmware",
+                  "link": "Ethernet link",
+                  "Value": "Tuners"
+                },
+                "indexByName": {
+                  "device_id": 0,
+                  "target": 1,
+                  "hwmodel": 2,
+                  "firmware": 3,
+                  "link": 4,
+                  "Value": 5
                 }
               }
             }
           ]
         },
-        "overrides": []
-      },
-      "options": {
-        "showValue": "never",
-        "mergeValues": true,
-        "rowHeight": 0.8,
-        "legend": {
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      }
-    },
-    {
-      "type": "table",
-      "id": 19,
-      "title": "Channel time in range",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 42
-      },
-      "description": "Per device + tuner + channel + client: first and last minute seen, and minutes watched, over the dashboard range (1-minute resolution).",
-      "targets": [
         {
+          "type": "timeseries",
+          "id": 18,
+          "title": "Scrape duration",
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 50
+          },
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "min_over_time(timestamp(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}))[$__range:1m]) * 1000",
-          "legendFormat": "",
-          "refId": "first",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
+          "description": "Time the exporter spent reading each device.",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "hdhomerun_scrape_duration_seconds{device_id=~\"$device_id\"}",
+              "legendFormat": "{{device_id}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
           },
-          "expr": "max_over_time(timestamp(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}))[$__range:1m]) * 1000",
-          "legendFormat": "",
-          "refId": "last",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "count_over_time(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"})[$__range:1m])",
-          "legendFormat": "",
-          "refId": "minutes",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        },
-        {
-          "id": "organize",
           "options": {
-            "excludeByName": {
-              "Time": true
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "renameByName": {
-              "Value #first": "First seen",
-              "Value #last": "Last seen",
-              "Value #minutes": "Minutes",
-              "vchannel": "Channel",
-              "name": "Name",
-              "client": "Client",
-              "tuner": "Tuner",
-              "device_id": "Device"
-            },
-            "indexByName": {
-              "device_id": 0,
-              "tuner": 1,
-              "vchannel": 2,
-              "name": 3,
-              "client": 4,
-              "Value #first": 5,
-              "Value #last": 6,
-              "Value #minutes": 7
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
             }
           }
         },
         {
-          "id": "sortBy",
+          "type": "timeseries",
+          "id": 19,
+          "title": "Bitrate by stage",
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 50
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "description": "device = the whole multiplex off the demodulator; transport_stream = after program filtering; network = sent to the client.",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "hdhomerun_tuner_bitrate_bits_per_second{device_id=~\"$device_id\"}",
+              "legendFormat": "{{device_id}} tuner {{tuner}} {{stage}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bps",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
           "options": {
-            "sort": [
-              {
-                "field": "Last seen",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto"
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "First seen"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeAsLocal"
-              }
-            ]
+        {
+          "type": "timeseries",
+          "id": 20,
+          "title": "Packets per second",
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 50
           },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Last seen"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "description": "Packets sent to the client.",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "hdhomerun_tuner_network_packets_per_second{device_id=~\"$device_id\"}",
+              "legendFormat": "{{device_id}} tuner {{tuner}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "min": 0
             },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeAsLocal"
-              }
-            ]
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
           }
-        ]
-      },
-      "options": {
-        "showHeader": true
-      }
+        }
+      ]
     }
-  ],
-  "description": "SiliconDust HDHomeRun tuners via hdhomerun-exporter: signal, reception errors, throughput, and who watched what."
+  ]
 }
