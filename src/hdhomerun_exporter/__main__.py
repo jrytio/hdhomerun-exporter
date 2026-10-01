@@ -32,7 +32,7 @@ def build_app(registry: CollectorRegistry) -> WSGIApp:
         if path == "/metrics":
             return metrics(environ, start_response)
         if path == "/healthz":
-            # Never touches a device: kubelet probes must add no device load.
+            # Never touches a device: health probes must add no device load.
             start_response("200 OK", [("Content-Type", "text/plain")])
             return [b"ok\n"]
         start_response("404 Not Found", [("Content-Type", "text/plain")])

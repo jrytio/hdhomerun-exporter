@@ -135,7 +135,7 @@ def parse_streaminfo(text: str) -> dict[str, tuple[str, str]]:
 
 
 def client_host(target: str) -> str:
-    """/tunerN/target ('http://10.42.21.20:60207', 'udp://...', 'none') -> client host or ''."""
+    """/tunerN/target ('http://192.168.1.20:60207', 'udp://...', 'none') -> client host or ''."""
     if not target or target == "none":
         return ""
     return urlsplit(target).hostname or ""

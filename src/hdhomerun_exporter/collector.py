@@ -143,9 +143,10 @@ Result = tuple[Target, DeviceSample | None, float]
 class HDHomeRunCollector(Collector):
     """Reads every target on collect(), single-flight, reusing a result for cache_seconds.
 
-    Anything in the cluster can GET /metrics. The lock means concurrent requests share
-    one device read instead of each opening its own sessions, and the short cache
-    absorbs bursts. At the normal 15s scrape interval every scrape still reads live.
+    Anything that can reach the port can GET /metrics. The lock means concurrent
+    requests share one device read instead of each opening its own sessions, and the
+    short cache absorbs bursts. At the normal 15s scrape interval every scrape still
+    reads live.
     """
 
     def __init__(self, targets: list[Target], timeout: float, cache_seconds: float = 1.0) -> None:
