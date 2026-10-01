@@ -629,7 +629,7 @@
       "type": "timeseries",
       "id": 12,
       "title": "Errors (only kinds with errors are drawn)",
-      "description": "Errors per second. The device's counts reset on every new stream (verified, spec 4.5), which is exactly counter-with-resets behaviour, so rate() counts each new stream from zero. transport = TS errors (te), crc = CRC, resync/overflow = device-side, network/network_stop = sending to the client.",
+      "description": "Errors per second. The counters restart at zero with each new stream, which rate() handles as a counter reset. transport = TS errors (te), crc = CRC, resync/overflow = device-side, network = sending to the client.",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -646,7 +646,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "rate(hdhomerun_tuner_errors{device_id=~\"$device_id\"}[$__rate_interval]) > 0",
+          "expr": "rate(hdhomerun_tuner_errors_total{device_id=~\"$device_id\"}[$__rate_interval]) > 0",
           "legendFormat": "{{device_id}} tuner {{tuner}} {{kind}}",
           "refId": "A"
         }
