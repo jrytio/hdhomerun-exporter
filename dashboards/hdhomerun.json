@@ -763,14 +763,14 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "One row per tuner; each bar is a channel and the client streaming it.",
+      "description": "One row per tuner; each bar is a channel and the client streaming it. \"no lock\" means a channel was set but the tuner could not lock onto a signal.",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "label_join(label_join(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}), \"channel\", \" \", \"vchannel\", \"name\"), \"state\", \" → \", \"channel\", \"client\") or label_replace(max by (device_id, tuner) (hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 0), \"state\", \"idle\", \"\", \"\")",
+          "expr": "label_join(label_join(max by (device_id, tuner, vchannel, name, client) (hdhomerun_tuner_channel_info{device_id=~\"$device_id\"}), \"channel\", \" \", \"vchannel\", \"name\"), \"state\", \" → \", \"channel\", \"client\") or label_replace(max by (device_id, tuner) (hdhomerun_tuner_in_use{device_id=~\"$device_id\"} == 0), \"state\", \"idle\", \"\", \"\") or label_replace(max by (device_id, tuner) (hdhomerun_tuner_in_use{device_id=~\"$device_id\"} == 1 and on(device_id, tuner) hdhomerun_tuner_locked{device_id=~\"$device_id\"} == 0), \"state\", \"no lock\", \"\", \"\")",
           "legendFormat": "",
           "refId": "A",
           "format": "table"
@@ -794,6 +794,11 @@
                   "text": "idle",
                   "color": "transparent",
                   "index": 0
+                },
+                "no lock": {
+                  "text": "no lock",
+                  "color": "red",
+                  "index": 1
                 }
               }
             }
