@@ -1,8 +1,9 @@
 """Bytes and text captured from a real HDHR4-2US (fw 20260313), 2026-09-29.
 
-The captured reply bytes are verbatim. In the text fixtures, the station call signs,
-virtual channels, RF frequency, TSID and client address are replaced with fictional
-values, so the fixtures do not identify a broadcast market or a home network.
+The captured reply bytes are verbatim. In the text fixtures, the station call signs
+are replaced with bare network names, and the virtual channels, RF frequency, TSID
+and client address with fictional values, so the fixtures do not identify a broadcast
+market or a home network.
 """
 
 # Request for /sys/version, as sent by a working client.
@@ -39,11 +40,11 @@ SYS_DEBUG = (
     "mem: nbk=5 dmk=210\nloop: pkt=0\nt0: pt=11 cal=-4990\nt1: pt=11 cal=-5015\neth: link=100f\n"
 )
 STREAMINFO = (
-    "3: 5.1 DEMO\n4: 5.2 DEMO2\n5: 5.3 DEMO3\n6: 5.4 DEMO4\n"
-    "7: 5.5 DEMO5\n8: 5.6 DEMO6\n9: 5.7 DEMO7\ntsid=0x1234\n"
+    "3: 5.1 ABC\n4: 5.2 NBC\n5: 5.3 CBS\n6: 5.4 Fox\n"
+    "7: 5.5 PBS\n8: 5.6 CW\n9: 5.7 ION\ntsid=0x1234\n"
 )
 
-# A whole device: tuner0 streaming 5.1 DEMO to 192.168.1.20, tuner1 idle, no tuner2.
+# A whole device: tuner0 streaming 5.1 ABC to 192.168.1.20, tuner1 idle, no tuner2.
 DEVICE_VALUES = {
     "/sys/hwmodel": "HDHR4-2US",
     "/sys/model": "hdhomerun4_atsc",
