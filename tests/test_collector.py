@@ -58,7 +58,7 @@ def test_full_scrape(device):
     channel = {
         **t0,
         "vchannel": "5.1",
-        "name": "DEMO",
+        "name": "ABC",
         "frequency_hz": "575000000",
         "modulation": "8vsb",
         "client": "192.168.1.20",
@@ -257,7 +257,7 @@ def test_vchannel_falls_back_to_streaminfo():
         channel = {
             **tuner_labels(t, 0),
             "vchannel": "5.1",
-            "name": "DEMO",
+            "name": "ABC",
             "frequency_hz": "575000000",
             "modulation": "8vsb",
             "client": "192.168.1.20",

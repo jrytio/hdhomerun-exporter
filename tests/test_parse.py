@@ -103,8 +103,8 @@ def test_link():
 
 def test_streaminfo():
     programs = parse_streaminfo(STREAMINFO)
-    assert programs["3"] == ("5.1", "DEMO")
-    assert programs["9"] == ("5.7", "DEMO7")
+    assert programs["3"] == ("5.1", "ABC")
+    assert programs["9"] == ("5.7", "ION")
     assert len(programs) == 7  # tsid line skipped
 
 
