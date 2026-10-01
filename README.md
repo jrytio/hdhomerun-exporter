@@ -41,7 +41,9 @@ In Grafana, go to **Dashboards → New → Import** and upload [`dashboards/hdho
 | `TIMEOUT_SECONDS` | `3` | Time budget for reading one device |
 | `CACHE_SECONDS` | `1` | Reuse a device read for this long. Concurrent requests always share one read. |
 
-Targets must be IP addresses; hostnames aren't accepted. Bad settings stop the exporter at startup with a message saying what's wrong.
+Targets must be IPv4 addresses; hostnames and IPv6 aren't accepted. A bad setting stops the exporter at startup with a message naming it.
+
+The exporter serves `/metrics`, and `/healthz` for container health checks. `/healthz` answers without contacting any tuner.
 
 ## Metrics
 
@@ -57,8 +59,34 @@ Every device series carries `device_id` and `target` (the `ip:port` it was read 
 | `hdhomerun_tuner_signal_strength_percent` / `_signal_quality_percent` / `_symbol_quality_percent` | Reception, for tuners in use. Symbol quality below 100 means viewers see glitches. |
 | `hdhomerun_tuner_errors_total{kind}` | Error counters (`transport`, `crc`, `resync`, `overflow`, `network`). They restart at zero with each new stream, so use `rate()` or `increase()`. |
 | `hdhomerun_tuner_bitrate_bits_per_second{stage}` / `_network_packets_per_second` | Throughput, for tuners in use |
-| `hdhomerun_tuner_channel_info{vchannel,name,client,…}` | What a locked tuner is showing, and to whom |
+| `hdhomerun_tuner_channel_info{vchannel,name,frequency_hz,modulation,client}` | What a locked tuner is showing, and to whom |
 | `hdhomerun_scrape_duration_seconds` | Time spent reading the device |
+| `hdhomerun_exporter_build_info{version}` | Exporter version |
+
+`client` is the viewer's IP address, so `/metrics` amounts to a viewing history. Expose it accordingly.
+
+## Alerts
+
+Two rules to start from:
+
+```yaml
+groups:
+  - name: hdhomerun
+    rules:
+      - alert: HDHomeRunDown
+        expr: hdhomerun_up == 0
+        for: 5m
+      - alert: HDHomeRunPoorReception
+        # Only tuners in use have this series, so idle tuners never fire it.
+        expr: hdhomerun_tuner_symbol_quality_percent < 100
+        for: 5m
+```
+
+## Compatibility
+
+Tested on an HDHomeRun CONNECT (HDHR4-2US) with firmware 20260313. Other models speak the same control protocol and should work, but haven't been tried. Only the tuner status (channel, lock and the three signal readings) is required; bitrate or error fields a model doesn't report are left out. CableCARD and ATSC 3.0 details aren't exported.
+
+If your model shows up as down, please open an issue with the output of `hdhomerun_config <device> get /tuner0/debug`.
 
 ## Development
 
