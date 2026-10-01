@@ -55,9 +55,34 @@ def test_stop_reason_is_not_an_error_count():
     assert d.errors == {"transport": 0, "crc": 0, "resync": 0, "overflow": 0, "network": 0}
 
 
-def test_missing_field_raises():
+def test_missing_tuner_status_field_raises():
+    with pytest.raises(ParseError, match="tun.snq"):
+        parse_tuner_debug(TUNER_DEBUG_STREAMING.replace(" snq=98", ""))
+
+
+def test_fields_a_firmware_does_not_print_are_left_out():
+    # No dev: line and no net bps: only the tun: status is required, so a firmware that
+    # prints a different set of counters still yields what it does have.
+    text = (
+        "tun: ch=8vsb:575000000 lock=8vsb:575000000 ss=100 snq=98 seq=100 dbg=1\n"
+        "ts:  bps=9366912 te=4 crc=0\n"
+        "net: pps=802 err=0 stop=0\n"
+    )
+    d = parse_tuner_debug(text)
+    assert d.signal_quality == 98
+    assert d.bitrate == {"transport_stream": 9366912}
+    assert d.network_pps == 802
+    assert d.errors == {"transport": 4, "crc": 0, "network": 0}
+
+
+def test_missing_packet_rate_is_none():
+    d = parse_tuner_debug(TUNER_DEBUG_STREAMING.replace(" pps=802", ""))
+    assert d.network_pps is None
+
+
+def test_non_numeric_counter_raises():
     with pytest.raises(ParseError, match="ts.te"):
-        parse_tuner_debug(TUNER_DEBUG_STREAMING.replace(" te=0", ""))
+        parse_tuner_debug(TUNER_DEBUG_STREAMING.replace("te=0", "te=many"))
 
 
 def test_non_numeric_field_raises():

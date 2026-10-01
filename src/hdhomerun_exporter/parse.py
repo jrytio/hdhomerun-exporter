@@ -11,10 +11,9 @@ class ParseError(ValueError):
     """A value the exporter depends on is missing or not a number."""
 
 
-ERROR_KINDS = ("transport", "crc", "resync", "overflow", "network")
 # kind -> (debug section, key) in /tunerN/debug. "net: stop=" is deliberately absent:
 # it is the reason code for the last stream stop, not a count.
-_ERROR_FIELDS = {
+ERROR_FIELDS = {
     "transport": ("ts", "te"),
     "crc": ("ts", "crc"),
     "resync": ("dev", "resync"),
@@ -52,9 +51,11 @@ class TunerDebug:
     signal_strength: int
     signal_quality: int
     symbol_quality: int
+    # Only the tun: status above is required. What follows holds whatever the firmware
+    # printed, so a model with a different set of counters still yields the rest.
     bitrate: dict[str, int]  # stage -> bits/s, stages from BITRATE_STAGES
-    network_pps: int
-    errors: dict[str, int]  # kind -> count, kinds from ERROR_KINDS
+    network_pps: int | None
+    errors: dict[str, int]  # kind -> count, kinds from ERROR_FIELDS
 
     @property
     def in_use(self) -> bool:
@@ -96,15 +97,22 @@ def parse_tuner_debug(text: str) -> TunerDebug:
         except ValueError:
             raise ParseError(f"tuner debug {section}.{key}={value!r} is not an integer") from None
 
+    def optional(section: str, key: str) -> int | None:
+        return number(section, key) if key in sections.get(section, {}) else None
+
+    def present(fields: dict[str, tuple[str, str]]) -> dict[str, int]:
+        values = {name: optional(*where) for name, where in fields.items()}
+        return {name: value for name, value in values.items() if value is not None}
+
     return TunerDebug(
         channel=_none(field("tun", "ch")),
         lock=_none(field("tun", "lock")),
         signal_strength=number("tun", "ss"),
         signal_quality=number("tun", "snq"),
         symbol_quality=number("tun", "seq"),
-        bitrate={stage: number(section, "bps") for stage, section in BITRATE_STAGES.items()},
-        network_pps=number("net", "pps"),
-        errors={kind: number(*_ERROR_FIELDS[kind]) for kind in ERROR_KINDS},
+        bitrate=present({stage: (section, "bps") for stage, section in BITRATE_STAGES.items()}),
+        network_pps=optional("net", "pps"),
+        errors=present(ERROR_FIELDS),
     )
 
 

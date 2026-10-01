@@ -111,6 +111,40 @@ def test_stop_reason_is_not_exported_as_errors():
         d.close()
 
 
+def test_idle_tuner_has_no_signal_or_throughput_series(device):
+    # With no channel set there is nothing to measure: a 0% reading would look like a
+    # dead signal to every alert and average.
+    t = Target("127.0.0.1", device.port, "x")
+    r = scrape(t)
+    t1 = tuner_labels(t, 1)
+    assert r.get_sample_value("hdhomerun_tuner_in_use", t1) == 0
+    assert r.get_sample_value("hdhomerun_tuner_signal_strength_percent", t1) is None
+    assert r.get_sample_value("hdhomerun_tuner_signal_quality_percent", t1) is None
+    assert r.get_sample_value("hdhomerun_tuner_symbol_quality_percent", t1) is None
+    assert r.get_sample_value("hdhomerun_tuner_network_packets_per_second", t1) is None
+    bitrate = "hdhomerun_tuner_bitrate_bits_per_second"
+    assert r.get_sample_value(bitrate, {**t1, "stage": "network"}) is None
+    # The counters stay, so rate() sees a stream's first errors rise from 0.
+    assert r.get_sample_value("hdhomerun_tuner_errors_total", {**t1, "kind": "crc"}) == 0
+
+
+def test_unfamiliar_debug_fields_drop_series_not_the_device():
+    debug = DEVICE_VALUES["/tuner0/debug"].replace("dev: bps=19466272 resync=0 overflow=0\n", "")
+    d = FakeDevice({**DEVICE_VALUES, "/tuner0/debug": debug})
+    try:
+        t = Target("127.0.0.1", d.port, "x")
+        r = scrape(t)
+        t0 = tuner_labels(t, 0)
+        bitrate = "hdhomerun_tuner_bitrate_bits_per_second"
+        assert r.get_sample_value("hdhomerun_up", device_labels(t)) == 1
+        assert r.get_sample_value(bitrate, {**t0, "stage": "device"}) is None
+        assert r.get_sample_value(bitrate, {**t0, "stage": "network"}) == 9367360
+        assert r.get_sample_value("hdhomerun_tuner_errors_total", {**t0, "kind": "resync"}) is None
+        assert r.get_sample_value("hdhomerun_tuner_errors_total", {**t0, "kind": "crc"}) == 0
+    finally:
+        d.close()
+
+
 def test_idle_tuner_skips_the_channel_gets(device):
     scrape(Target("127.0.0.1", device.port, "x")).get_sample_value("hdhomerun_up", {})
     assert "/tuner1/vchannel" not in device.requests
@@ -175,6 +209,8 @@ def test_tuned_but_unlocked_tuner_has_no_channel_info():
         assert r.get_sample_value("hdhomerun_up", device_labels(t)) == 1
         assert r.get_sample_value("hdhomerun_tuner_in_use", t1) == 1
         assert r.get_sample_value("hdhomerun_tuner_locked", t1) == 0
+        # Tuned without a lock is exactly when a 0% reading is real and worth seeing.
+        assert r.get_sample_value("hdhomerun_tuner_signal_strength_percent", t1) == 0
         channel_series = [
             s
             for m in r.collect()
