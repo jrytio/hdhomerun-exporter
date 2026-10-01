@@ -2,8 +2,18 @@
 name = "hdhomerun-exporter"
 version = "1.0.0"
 description = "Prometheus exporter for SiliconDust HDHomeRun tuners, over the TCP control protocol"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = ["prometheus-client>=0.26,<1"]
+
+[project.urls]
+Repository = "https://github.com/jrytio/hdhomerun-exporter"
+Changelog = "https://github.com/jrytio/hdhomerun-exporter/blob/main/CHANGELOG.md"
+
+[project.scripts]
+hdhomerun-exporter = "hdhomerun_exporter.__main__:main"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.13"]

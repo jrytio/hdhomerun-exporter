@@ -7,6 +7,8 @@ WORKDIR /app
 # Dependencies first, so a source-only change reuses this layer.
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
+# README.md and LICENSE are named in pyproject.toml, so the package build needs them.
+COPY README.md LICENSE ./
 COPY src ./src
 RUN uv sync --frozen --no-dev --no-editable
 
