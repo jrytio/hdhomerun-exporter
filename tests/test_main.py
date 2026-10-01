@@ -98,3 +98,13 @@ def test_sigterm_stops_the_exporter_cleanly():
     finally:
         proc.kill()
         proc.stderr.close()
+
+
+@pytest.mark.parametrize("name", ["TIMEOUT_SECONDS", "CACHE_SECONDS"])
+def test_non_numeric_setting_is_named_in_the_startup_error(name):
+    env = {**os.environ, "HDHOMERUN_TARGETS": "127.0.0.1", name: "abc"}
+    result = subprocess.run(
+        [sys.executable, "-m", "hdhomerun_exporter"], env=env, capture_output=True, text=True
+    )
+    assert result.returncode != 0
+    assert f"{name}='abc' is not a number" in result.stderr
