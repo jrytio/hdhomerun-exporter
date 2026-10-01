@@ -50,6 +50,14 @@ def parse_port(value: str) -> int:
     return port
 
 
+def env_seconds(name: str, default: str) -> float:
+    value = os.environ.get(name, default)
+    try:
+        return float(value)
+    except ValueError:
+        raise ValueError(f"{name}={value!r} is not a number") from None
+
+
 def build_registry(
     targets_spec: str, timeout: float, cache_seconds: float = 1.0
 ) -> CollectorRegistry:
@@ -79,8 +87,8 @@ def main() -> None:
     try:
         registry = build_registry(
             os.environ.get("HDHOMERUN_TARGETS", ""),
-            float(os.environ.get("TIMEOUT_SECONDS", "3")),
-            float(os.environ.get("CACHE_SECONDS", "1")),
+            env_seconds("TIMEOUT_SECONDS", "3"),
+            env_seconds("CACHE_SECONDS", "1"),
         )
         port = parse_port(os.environ.get("LISTEN_PORT", "9137"))
     except ValueError as exc:
