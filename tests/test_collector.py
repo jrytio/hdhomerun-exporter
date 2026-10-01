@@ -31,7 +31,7 @@ def device():
 
 
 def test_full_scrape(device):
-    t = Target("127.0.0.1", device.port, "104705FA")
+    t = Target("127.0.0.1", device.port, "1234ABCD")
     r = scrape(t)
     dev = device_labels(t)
     assert r.get_sample_value("hdhomerun_up", dev) == 1
@@ -61,7 +61,7 @@ def test_full_scrape(device):
         "name": "DEMO",
         "frequency_hz": "575000000",
         "modulation": "8vsb",
-        "client": "10.42.21.20",
+        "client": "192.168.1.20",
     }
     assert r.get_sample_value("hdhomerun_tuner_channel_info", channel) == 1
 
@@ -260,7 +260,7 @@ def test_vchannel_falls_back_to_streaminfo():
             "name": "DEMO",
             "frequency_hz": "575000000",
             "modulation": "8vsb",
-            "client": "10.42.21.20",
+            "client": "192.168.1.20",
         }
         assert r.get_sample_value("hdhomerun_tuner_channel_info", channel) == 1
     finally:
@@ -280,7 +280,7 @@ def test_other_device_error_during_tuner_enumeration_marks_device_down():
 
 
 def test_parse_targets():
-    assert parse_targets("10.42.21.53=104705FA") == [Target("10.42.21.53", 65001, "104705FA")]
+    assert parse_targets("192.168.1.50=1234ABCD") == [Target("192.168.1.50", 65001, "1234ABCD")]
     assert parse_targets(" 10.0.0.1:1234 , 10.0.0.2 ") == [
         Target("10.0.0.1", 1234, "10.0.0.1"),
         Target("10.0.0.2", 65001, "10.0.0.2"),

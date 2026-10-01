@@ -37,10 +37,10 @@ def device():
 
 
 def test_metrics_endpoint_scrapes_the_device(device):
-    app = build_app(build_registry(f"127.0.0.1:{device.port}=104705FA", 1.0))
+    app = build_app(build_registry(f"127.0.0.1:{device.port}=1234ABCD", 1.0))
     status, body = call(app, "/metrics")
     assert status.startswith("200")
-    assert b'hdhomerun_up{device_id="104705FA"' in body
+    assert b'hdhomerun_up{device_id="1234ABCD"' in body
     assert b"process_" in body or b"python_info" in body  # exporter self-metrics
 
 
@@ -52,7 +52,7 @@ def test_build_info_reports_the_package_version(device):
 
 
 def test_healthz_never_touches_the_device(device):
-    app = build_app(build_registry(f"127.0.0.1:{device.port}=104705FA", 1.0))
+    app = build_app(build_registry(f"127.0.0.1:{device.port}=1234ABCD", 1.0))
     status, body = call(app, "/healthz")
     assert status.startswith("200") and body == b"ok\n"
     assert device.requests == []

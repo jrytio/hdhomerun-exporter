@@ -109,7 +109,7 @@ def test_streaminfo():
 
 
 def test_client_host():
-    assert client_host("http://10.42.21.20:60207") == "10.42.21.20"
-    assert client_host("udp://10.42.2.198:5000") == "10.42.2.198"
+    assert client_host("http://192.168.1.20:60207") == "192.168.1.20"
+    assert client_host("udp://192.168.1.31:5000") == "192.168.1.31"
     assert client_host("none") == ""
     assert client_host("") == ""
