@@ -55,7 +55,7 @@ Every device series carries `device_id` and `target` (the `ip:port` it was read 
 | `hdhomerun_ethernet_link_info{link}` | Ethernet link, e.g. `100f` = 100 Mbit full duplex |
 | `hdhomerun_tuner_in_use` / `_locked` | Channel set / signal locked |
 | `hdhomerun_tuner_signal_strength_percent` / `_signal_quality_percent` / `_symbol_quality_percent` | Reception. Symbol quality below 100 means viewers see glitches. |
-| `hdhomerun_tuner_errors{kind}` | Error counts (`transport`, `crc`, `resync`, `overflow`, `network`, `network_stop`). They reset on each new stream, so use `rate()`. |
+| `hdhomerun_tuner_errors_total{kind}` | Error counters (`transport`, `crc`, `resync`, `overflow`, `network`). They restart at zero with each new stream, so use `rate()` or `increase()`. |
 | `hdhomerun_tuner_bitrate_bits_per_second{stage}` / `_network_packets_per_second` | Throughput |
 | `hdhomerun_tuner_channel_info{vchannel,name,client,…}` | What a locked tuner is showing, and to whom |
 | `hdhomerun_scrape_duration_seconds` | Time spent reading the device |

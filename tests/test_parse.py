@@ -16,14 +16,7 @@ def test_streaming_tuner_debug():
     assert (d.signal_strength, d.signal_quality, d.symbol_quality) == (100, 98, 100)
     assert d.bitrate == {"device": 19466272, "transport_stream": 9366912, "network": 9367360}
     assert d.network_pps == 802
-    assert d.errors == {
-        "transport": 0,
-        "crc": 0,
-        "resync": 0,
-        "overflow": 0,
-        "network": 0,
-        "network_stop": 0,
-    }
+    assert d.errors == {"transport": 0, "crc": 0, "resync": 0, "overflow": 0, "network": 0}
     assert d.modulation == "8vsb"
     assert d.frequency_hz == "575000000"
 
@@ -48,13 +41,18 @@ def test_error_counters_map_to_kinds():
         TUNER_DEBUG_STREAMING.replace("te=0", "te=7")
         .replace("crc=0", "crc=3")
         .replace("resync=0", "resync=1")
-        .replace("stop=0", "stop=2")
+        .replace("overflow=0", "overflow=5")
+        .replace("err=0", "err=2")
     )
     d = parse_tuner_debug(text)
-    assert d.errors["transport"] == 7
-    assert d.errors["crc"] == 3
-    assert d.errors["resync"] == 1
-    assert d.errors["network_stop"] == 2
+    assert d.errors == {"transport": 7, "crc": 3, "resync": 1, "overflow": 5, "network": 2}
+
+
+def test_stop_reason_is_not_an_error_count():
+    # net stop= is the reason code for the last stream stop (0 while streaming; an idle
+    # tuner keeps showing e.g. 4 or 9), so it must never be counted as errors.
+    d = parse_tuner_debug(TUNER_DEBUG_IDLE.replace("stop=0", "stop=9"))
+    assert d.errors == {"transport": 0, "crc": 0, "resync": 0, "overflow": 0, "network": 0}
 
 
 def test_missing_field_raises():

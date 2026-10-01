@@ -10,7 +10,7 @@ from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
-from prometheus_client.core import GaugeMetricFamily, Metric
+from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Metric
 from prometheus_client.registry import Collector
 
 from .parse import (
@@ -234,10 +234,11 @@ def build_families(results: Iterable[Result]) -> list[Metric]:
         "Packets per second sent to the client.",
         tuner,
     )
-    errors = gauge(
+    errors = CounterMetricFamily(
         "hdhomerun_tuner_errors",
-        "Error counts from /tunerN/debug (te, crc, resync, overflow, err, stop).",
-        [*tuner, "kind"],
+        "Errors from /tunerN/debug (te, crc, resync, overflow, err); restarts at 0 "
+        "with each new stream.",
+        labels=[*tuner, "kind"],
     )
     channel = gauge(
         "hdhomerun_tuner_channel_info",

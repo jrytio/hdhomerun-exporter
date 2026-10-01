@@ -54,7 +54,7 @@ def test_full_scrape(device):
         == 9367360
     )
     assert r.get_sample_value("hdhomerun_tuner_network_packets_per_second", t0) == 802
-    assert r.get_sample_value("hdhomerun_tuner_errors", {**t0, "kind": "crc"}) == 0
+    assert r.get_sample_value("hdhomerun_tuner_errors_total", {**t0, "kind": "crc"}) == 0
     channel = {
         **t0,
         "vchannel": "5.1",
@@ -76,6 +76,39 @@ def test_full_scrape(device):
         if s.labels["tuner"] == "1"
     ]
     assert samples == []
+
+
+def test_errors_are_a_counter_per_kind():
+    debug = DEVICE_VALUES["/tuner0/debug"].replace("te=0", "te=7").replace("err=0", "err=2")
+    d = FakeDevice({**DEVICE_VALUES, "/tuner0/debug": debug})
+    try:
+        t = Target("127.0.0.1", d.port, "x")
+        r = scrape(t)
+        t0 = tuner_labels(t, 0)
+        assert r.get_sample_value("hdhomerun_tuner_errors_total", {**t0, "kind": "transport"}) == 7
+        assert r.get_sample_value("hdhomerun_tuner_errors_total", {**t0, "kind": "network"}) == 2
+        (family,) = [m for m in r.collect() if m.name == "hdhomerun_tuner_errors"]
+        assert family.type == "counter"
+    finally:
+        d.close()
+
+
+def test_stop_reason_is_not_exported_as_errors():
+    # An idle tuner keeps the reason code of its last stream stop (seen live: 4 and 9).
+    values = {**DEVICE_VALUES, "/tuner1/debug": TUNER_DEBUG_IDLE.replace("stop=0", "stop=9")}
+    d = FakeDevice(values)
+    try:
+        t = Target("127.0.0.1", d.port, "x")
+        errors = {
+            s.labels["kind"]: s.value
+            for m in scrape(t).collect()
+            if m.name == "hdhomerun_tuner_errors"
+            for s in m.samples
+            if s.labels["tuner"] == "1" and s.name == "hdhomerun_tuner_errors_total"
+        }
+        assert errors == {"transport": 0, "crc": 0, "resync": 0, "overflow": 0, "network": 0}
+    finally:
+        d.close()
 
 
 def test_idle_tuner_skips_the_channel_gets(device):

@@ -11,15 +11,15 @@ class ParseError(ValueError):
     """A value the exporter depends on is missing or not a number."""
 
 
-ERROR_KINDS = ("transport", "crc", "resync", "overflow", "network", "network_stop")
-# kind -> (debug section, key) in /tunerN/debug
+ERROR_KINDS = ("transport", "crc", "resync", "overflow", "network")
+# kind -> (debug section, key) in /tunerN/debug. "net: stop=" is deliberately absent:
+# it is the reason code for the last stream stop, not a count.
 _ERROR_FIELDS = {
     "transport": ("ts", "te"),
     "crc": ("ts", "crc"),
     "resync": ("dev", "resync"),
     "overflow": ("dev", "overflow"),
     "network": ("net", "err"),
-    "network_stop": ("net", "stop"),
 }
 BITRATE_STAGES = {"device": "dev", "transport_stream": "ts", "network": "net"}
 

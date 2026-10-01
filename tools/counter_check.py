@@ -1,4 +1,4 @@
-"""Learn whether /tunerN/debug error counts reset per stream (spec §4.5). Dev tool, not shipped.
+"""Learn whether /tunerN/debug error counts reset per stream. Dev tool, not shipped.
 
 Occupies ONE free tuner while it runs. Without an argument it first scans every
 lineup channel for 15 s each (~4 min for 14 channels) and picks the one with
@@ -113,9 +113,9 @@ def main() -> None:
     if end1 == 0:
         print("INCONCLUSIVE: no errors occurred, so a reset cannot be observed.")
     elif start2 < end1:
-        print("RESET PER STREAM -> export as a gauge (hdhomerun_tuner_errors).")
+        print("RESET PER STREAM: counts restart at zero with each stream (a counter that resets).")
     else:
-        print("CUMULATIVE ACROSS STREAMS -> export as a counter (hdhomerun_tuner_errors_total).")
+        print("CUMULATIVE ACROSS STREAMS: counts carry over from one stream to the next.")
 
 
 if __name__ == "__main__":
