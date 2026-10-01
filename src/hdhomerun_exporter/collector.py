@@ -14,7 +14,6 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Metri
 from prometheus_client.registry import Collector
 
 from .parse import (
-    ERROR_KINDS,
     ParseError,
     TunerDebug,
     client_host,
@@ -212,6 +211,7 @@ def build_families(results: Iterable[Result]) -> list[Metric]:
     )
     in_use = gauge("hdhomerun_tuner_in_use", "1 if the tuner has a channel set.", tuner)
     locked = gauge("hdhomerun_tuner_locked", "1 if the tuner has a modulation lock.", tuner)
+    # The signal and throughput families below only have series for tuners in use.
     strength = gauge(
         "hdhomerun_tuner_signal_strength_percent", "Signal strength (ss), 0-100.", tuner
     )
@@ -260,14 +260,19 @@ def build_families(results: Iterable[Result]) -> list[Metric]:
             d = t.debug
             in_use.add_metric(labels, int(d.in_use))
             locked.add_metric(labels, int(d.locked))
+            # Counters are exported for idle tuners too, so rate() sees a stream's first
+            # errors rise from 0.
+            for kind, count in d.errors.items():
+                errors.add_metric([*labels, kind], count)
+            if not d.in_use:
+                continue  # nothing is tuned, so there is no signal or throughput to report
             strength.add_metric(labels, d.signal_strength)
             quality.add_metric(labels, d.signal_quality)
             symbol.add_metric(labels, d.symbol_quality)
             for stage, bps in d.bitrate.items():
                 bitrate.add_metric([*labels, stage], bps)
-            pps.add_metric(labels, d.network_pps)
-            for kind in ERROR_KINDS:
-                errors.add_metric([*labels, kind], d.errors[kind])
+            if d.network_pps is not None:
+                pps.add_metric(labels, d.network_pps)
             if d.locked:
                 channel.add_metric(
                     [*labels, t.vchannel, t.name, d.frequency_hz, d.modulation, t.client], 1

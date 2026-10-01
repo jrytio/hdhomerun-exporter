@@ -68,7 +68,7 @@ def watch(guide: str, seconds: int, ip: str) -> list[tuple[int, TunerDebug]]:
 
 
 def rf_errors(d: TunerDebug) -> int:
-    return d.errors["transport"] + d.errors["crc"]
+    return d.errors.get("transport", 0) + d.errors.get("crc", 0)
 
 
 def main() -> None:
