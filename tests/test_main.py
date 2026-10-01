@@ -1,9 +1,11 @@
 import io
 import os
+import pathlib
 import signal
 import socket
 import subprocess
 import sys
+import tomllib
 
 import pytest
 from fakes import FakeDevice
@@ -40,6 +42,13 @@ def test_metrics_endpoint_scrapes_the_device(device):
     assert status.startswith("200")
     assert b'hdhomerun_up{device_id="104705FA"' in body
     assert b"process_" in body or b"python_info" in body  # exporter self-metrics
+
+
+def test_build_info_reports_the_package_version(device):
+    pyproject = pathlib.Path(__file__).parent.parent / "pyproject.toml"
+    version = tomllib.loads(pyproject.read_text())["project"]["version"]
+    registry = build_registry(f"127.0.0.1:{device.port}", 1.0)
+    assert registry.get_sample_value("hdhomerun_exporter_build_info", {"version": version}) == 1
 
 
 def test_healthz_never_touches_the_device(device):

@@ -8,10 +8,11 @@ import os
 import signal
 import sys
 from collections.abc import Callable, Iterable
+from importlib.metadata import version
 from socketserver import ThreadingMixIn
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
-from prometheus_client import CollectorRegistry, make_wsgi_app
+from prometheus_client import CollectorRegistry, Gauge, make_wsgi_app
 from prometheus_client.gc_collector import GCCollector
 from prometheus_client.platform_collector import PlatformCollector
 from prometheus_client.process_collector import ProcessCollector
@@ -67,6 +68,12 @@ def build_registry(
         raise ValueError(f"CACHE_SECONDS={cache_seconds} must be a finite number, 0 or above")
     registry = CollectorRegistry()
     registry.register(HDHomeRunCollector(parse_targets(targets_spec), timeout, cache_seconds))
+    Gauge(
+        "hdhomerun_exporter_build_info",
+        "Exporter version; always 1.",
+        ["version"],
+        registry=registry,
+    ).labels(version("hdhomerun-exporter")).set(1)
     ProcessCollector(registry=registry)
     PlatformCollector(registry=registry)
     GCCollector(registry=registry)
