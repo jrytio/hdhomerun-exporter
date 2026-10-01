@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import math
 import os
+import signal
 import sys
 from collections.abc import Callable, Iterable
 from socketserver import ThreadingMixIn
@@ -84,11 +85,14 @@ def main() -> None:
         port = parse_port(os.environ.get("LISTEN_PORT", "9137"))
     except ValueError as exc:
         sys.exit(f"hdhomerun-exporter: bad configuration: {exc}")
-    server = make_server(
+    # As PID 1 in a container an unhandled SIGTERM is ignored, so `docker stop` would
+    # wait out its grace period and then kill the process.
+    signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(0))
+    with make_server(
         "", port, build_app(registry), _ThreadingWSGIServer, handler_class=_QuietHandler
-    )
-    log.info("listening on :%d", port)
-    server.serve_forever()
+    ) as server:
+        log.info("listening on :%d", port)
+        server.serve_forever()
 
 
 if __name__ == "__main__":

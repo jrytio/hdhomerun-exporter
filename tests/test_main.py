@@ -1,4 +1,9 @@
 import io
+import os
+import signal
+import socket
+import subprocess
+import sys
 
 import pytest
 from fakes import FakeDevice
@@ -75,3 +80,21 @@ def test_listen_port():
 def test_bad_cache_seconds_fails_at_startup(cache):
     with pytest.raises(ValueError, match="CACHE_SECONDS"):
         build_registry("10.0.0.1", 1.0, cache)
+
+
+def test_sigterm_stops_the_exporter_cleanly():
+    # In a container the exporter is PID 1, where an unhandled SIGTERM is ignored and
+    # `docker stop` ends in SIGKILL. Handled, it exits 0 here and there.
+    with socket.create_server(("127.0.0.1", 0)) as s:
+        port = s.getsockname()[1]
+    env = {**os.environ, "HDHOMERUN_TARGETS": "127.0.0.1", "LISTEN_PORT": str(port)}
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "hdhomerun_exporter"], env=env, stderr=subprocess.PIPE, text=True
+    )
+    try:
+        assert "listening" in proc.stderr.readline()
+        proc.send_signal(signal.SIGTERM)
+        assert proc.wait(timeout=5) == 0
+    finally:
+        proc.kill()
+        proc.stderr.close()
